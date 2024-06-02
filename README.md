@@ -4,4 +4,4 @@ Central navigation
 
 Need to fix scale on android vs iphone devices. 
 
-http://number2.site
+<a href="http://number2.site" target="_blank">number2.site</a>
