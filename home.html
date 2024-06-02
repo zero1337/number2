@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Number 2 | Home</title>
+    <style>body, html {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+        margin-top: 22px;
+        background-color: none;
+        font-size: xx-large;
+        font-family: 'Courier New', monospace;
+        display: grid;
+        justify-content: center;
+        align-items: start;
+        color: #a0fa96;
+        text-shadow: 0 0 16.6px #8cff83;
+        /* #93f18c */
+    }
+   
+    .title {
+        width: 200%; 
+        height: 1px; 
+        margin: 0;
+        padding: 0;
+        
+    }
+
+ 
+    .mc {
+        width: 200%; 
+        height: 600px; 
+        margin: 0;
+        padding: 0;
+    }
+    .cursor {
+        display: inline-block;
+        background-color: #a0fa96;
+        margin-left: 2px;
+        width: 10px;
+        height: 22px;
+        animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+        50% {
+            background-color: transparent;
+        }
+    }
+
+    @keyframes scaleLine {
+    0% {
+        transform: scale(1, 1);
+    }
+    100% {
+        transform: scale(5, 5); /* Scale width to 10 times its original size */
+    }
+}
+
+.makebigger {
+      
+  width: 300px;
+    height: 300px;
+    display: block;
+    margin: 50px auto; /* Centering in the viewport */
+    background: black; 
+    stroke: #fff;
+    font-size: small;
+    animation: scaleLine 1.7s forwards;
+    animation-delay: 2.1s;
+      
+    }
+    
+    .svraf {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        display: none;
+        cursor: pointer;
+        -webkit-filter: drop-shadow( 2px 3px 22px #a0fa96);
+        filter: drop-shadow( 2px 3px 22px #a0fa96);
+    }
+    .menu-button {
+    fill: #000; /* No fill to create the wireframe look */
+    stroke: #a0fa96; /* Outline color */
+    stroke-width: 2px; /* Width of the outline */
+    transition: stroke 0.3s; /* Smooth transition for hover effect */
+    }
+    .menu-button:hover {
+        fill: #a0fa96;
+        background: linear-gradient(to left, #000 50%, #a0fa96 50%) right;
+        background-size: 200%;
+        transition: .5s ease-out;
+    }
+    .menu-button.active {
+        background-position: left;
+    }
+
+  @media (max-width: 990px) {
+    #bezierMenu {
+      transform: scale(4.5); 
+      transform-origin: center; /* Ensure the menu scales from the top left corner */
+    }
+    #maincon {
+        transform: scale(2.1);
+        transform-origin: left;
+    }
+}
+
+    </style>    
+</head>
+<body>
+
+  
+    <div id="svgContainer"></div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const container = document.getElementById("svgContainer");
+        container.style.position = "fixed";
+        container.style.top = "0";
+        container.style.left = "0";
+        container.style.width = "100%";
+        container.style.height = "100%";
+        container.style.zIndex = "-1";
+        container.style.overflow = "hidden";
+        container.style.backgroundColor = "black";
+    
+        let firstLoad = true;
+    
+        function createStar() {
+            let star = document.createElementNS(svgNS, "circle");
+            star.setAttribute("cx", Math.random() * window.innerWidth);
+            star.setAttribute("cy", Math.random() * window.innerHeight);
+            star.setAttribute("r", 0);  // Start with 0 radius for smooth animation start
+            star.setAttribute("fill", "white");
+            star.setAttribute("fill-opacity", "0");  // Start fully transparent
+            return star;
+        }
+    
+        function animateStar(star, isFirstLoad) {
+            let duration = Math.random() * 3 + 2;  // Random duration between 2 to 5 seconds
+            let maxRadius = Math.random() * 2 + 1;  // Max size of the star
+    
+            // Animate radius growth
+            let radiusAnimation = document.createElementNS(svgNS, "animate");
+            radiusAnimation.setAttribute("attributeName", "r");
+            radiusAnimation.setAttribute("from", "2.2");
+            radiusAnimation.setAttribute("to", maxRadius);
+            radiusAnimation.setAttribute("begin", "0s");
+            radiusAnimation.setAttribute("dur", `${duration}s`);
+            radiusAnimation.setAttribute("fill", "freeze");
+    
+            // Animate opacity to make stars fade in and out smoothly
+            let opacityAnimation = document.createElementNS(svgNS, "animate");
+            opacityAnimation.setAttribute("attributeName", "fill-opacity");
+            opacityAnimation.setAttribute("values", "0;1;0");
+            opacityAnimation.setAttribute("times", "0;0.5;1");
+            opacityAnimation.setAttribute("dur", `${duration}s`);
+            opacityAnimation.setAttribute("repeatCount", isFirstLoad ? "1" : "indefinite");
+    
+            star.appendChild(radiusAnimation);
+            star.appendChild(opacityAnimation);
+    
+            if (isFirstLoad) {
+                // Animate upward movement only on the first load
+                let endY = -Math.random() * window.innerHeight;  // Ending y position above the viewport
+                let motionAnimation = document.createElementNS(svgNS, "animateTransform");
+                motionAnimation.setAttribute("attributeName", "transform");
+                motionAnimation.setAttribute("type", "translate");
+                motionAnimation.setAttribute("from", `0,0`);
+                motionAnimation.setAttribute("to", `0,${endY}`);
+                motionAnimation.setAttribute("begin", "0s");
+                motionAnimation.setAttribute("dur", `${duration}s`);
+                motionAnimation.setAttribute("fill", "freeze");
+                star.appendChild(motionAnimation);
+            }
+        }
+    
+        function populateStars(numStars, isFirstLoad) {
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", `0 0 ${window.innerWidth} ${window.innerHeight}`);
+            svg.style.position = "absolute";
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+    
+            for (let i = 0; i < numStars; i++) {
+                let star = createStar();
+                animateStar(star, isFirstLoad);
+                svg.appendChild(star);
+            }
+            container.appendChild(svg);
+        }
+    
+        populateStars(122, true); // Initial load with upward animation
+    
+        // To continuously add stars over time, not just at the beginning
+        setInterval(() => {
+            container.firstChild.remove(); // Remove old stars to prevent slowdown
+             // Reload stars without upward animation
+        }, 5000);  // Refresh stars every 20 seconds to simulate continuous movement
+    });
+    </script>
+ <!--*********************************************************start*******************************--> 
+    <!--  Put here under blinker **************************************************************-->   
+ 
+</div>
+
+<div class="title" id="maincon">
+<svg width="100%" height="111px" xmlns="http://www.w3.org/2000/svg">
+    <text x="10" y="66" font-family="Courier New, monospace" position="absolute" font-size="99" fill="#a0fa96" opacity="0">
+      Number 2 
+      <animate attributeName="opacity" from="0" to="1" dur="3s" fill="freeze" />
+    </text>
+
+    <text x="3" y="88" font-family="Courier New, monospace" position="absolute" text-align="center" font-size="33" fill="#a0fa96" opacity="0">
+        Welcome to the Vector-sphere
+        <animate attributeName="opacity" from="0" to="1" dur="3s" begin="0s" fill="freeze"  />
+        <animate attributeName="font-size" from="33" to="45" dur="3s" begin="2s"  />
+        <animate attributeName="font-size" from="45" to="0" dur="0.4s" begin="5s"  />
+        <animate attributeName="opacity" from="1" to="0" dur="0.4s" begin="5s" fill="freeze" />
+      </text>
+
+</svg>
+
+<!--
+    *****************************************MC************************************************************
+
+    yous xlink:href="#myPathId" in the animate ele and call it in the path ele  to call same ani for multi path ele
+Here’s how you can update the animateTransform to work correctly with the scaled coordinates:
+for the movement of the navs set in g then divide where the cords should be and divide by the scale
+    Scale the translation values accordingly: Since your scale is 2.4, you need to divide the translation values by 2.4 to get the correct values.
+    in the movement 
+    you have to set the location with translate in the g ele when moving to adjust for anitransform
+    zero the from and minus - the x on the to in the anitransform  --- what? came back and read this lol sorry..
+-->
+<!--
+</div>
+<div class="mc">
+    -->
+    <svg width="100%" height="900px"  xmlns="http://www.w3.org/2000/svg">
+
+    <text x="155" y="166" font-family="Courier New, monospace" position="absolute" font-size="66" fill="#a0fa96" opacity="0">
+        Navigation
+        <animate attributeName="opacity" from="0" to="1" dur="4s" fill="freeze" />
+        <animate attributeName="font-size" from="66" to="65" dur="1s" begin="3s"  />
+        <animate attributeName="font-size" from="66" to="68" dur="2s" begin="4s"  />
+        <animate attributeName="font-size" from="66" to="67" dur="1s" begin="6s"  />
+        <animate attributeName="font-size" from="67" to="66" dur="3s" begin="7s"  />
+    </text>
+ <!--home button-->
+ <g transform="scale(2.4) translate(226.67, 47.08)">
+  <path stroke="#a0fa96" stroke-linecap="round" stroke-linejoin="round" 
+        d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" opacity="0">
+    
+    <!-- Opacity animation -->
+    <animate attributeName="opacity" from="0" to="1" dur="2s" fill="freeze" />
+    
+    <!-- Transform animation -->
+    <animateTransform attributeName="transform" type="translate" 
+      values="0,0; 10,18; 5,26; -63.51,29.25; -63.51,29.25; 0,0"
+      keyTimes="0; 0.01; 0.25; 0.5; 0.75; 1"
+      dur="8s" begin="6s" fill="freeze"/> 
+  </path>
+</g>
+    <!--right button-->
+    <path stroke="#a0fa96" transform="translate(180, 166) scale(2.4)" stroke-linecap="round" stroke-linejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" opacity="0.77">
+        <animate attributeName="opacity" from="0" to="1" dur="2s" fill="freeze" />
+    </path>
+    <!-- narticles narrative articles button -->
+
+
+    <g transform="scale(2.4) translate(185,69.16)">
+      <path stroke="#a0fa96" stroke-linecap="round" stroke-linejoin="round" 
+            d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" opacity="0.77">
+        <!-- Opacity animation -->
+        <animate attributeName="opacity" from="0" to="1" dur="2s" fill="freeze" />
+        
+        <!-- Transform animation -->
+        <animateTransform attributeName="transform" type="translate" 
+          values="0,0; 23,51; 23,51; 0,0"
+          keyTimes="0; 0.5; 0.75; 1"
+          dur="8s" begin="6s" fill="freeze"/> 
+      </path>
+    </g>
+
+
+
+      <!-- gso button -->
+        <path stroke="#a0fa96" transform="translate(297, 93) scale(1.9)"stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" opacity="0">
+        <animate attributeName="opacity" from="0" to="1" dur="2s" fill="freeze" />
+        </path>
+    <!--  left button -->
+          
+    <g transform="scale(2.4) translate(81,34.58)">
+            <path stroke="#a0fa96" stroke-linecap="round" stroke-linejoin="round" 
+            d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z">
+              
+              <!-- Opacity animation -->
+              <animate attributeName="opacity" from="0" to="1" dur="2s" fill="freeze" />
+              
+              <!-- Transform animation -->
+              <animateTransform attributeName="transform" type="translate" 
+                values="0,0; 37,84; 37,84; 0,0"
+                keyTimes="0; 0.5; 0.75; 1"
+                dur="8s" begin="6s" fill="freeze"/> 
+            </path>
+          </g>
+
+
+
+
+        
+        <!-- page action icons -->
+
+<g transform="translate(390,395) scale(2.4)">
+
+    <!-- dollar sign -->  
+    <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1s" begin="8s" fill="freeze"  />
+      <animate attributeName="opacity" from="1" to="0" dur="1s" begin="8.5s" fill="freeze"  />
+      </path>
+  
+      <!-- bookmark  --> 
+    <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1s" begin="9s" fill="freeze"  />
+      <animate attributeName="opacity" from="1" to="0" dur="1s" begin="9.5s" fill="freeze"  />
+    </path>
+      
+      <!-- mouse click -->
+    <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1s" begin="10s" fill="freeze"  />
+      <animate attributeName="opacity" from="1" to="0" dur="1s" begin="10.5s" fill="freeze"  />
+    </path>
+  
+  <!-- link -->
+    <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1s" begin="11s" fill="freeze"  />
+      <animate attributeName="opacity" from="1" to="0" dur="1s" begin="11.5s" fill="freeze"  />
+    </path>
+  
+  <!-- play -->
+    <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1s" begin="12s" fill="freeze"  />
+      <animate attributeName="opacity" from="1" to="0" dur="1s" begin="12.5s" fill="freeze"  />
+    </path>
+    <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1s" begin="12s" fill="freeze"  />
+      <animate attributeName="opacity" from="1" to="0" dur="1s" begin="12.5s" fill="freeze"  />
+    </path>
+  
+    <!-- Page Activity Button - aka: PAB lol -->
+      <path stroke="#a0fa96"  stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" opacity="0">
+    
+        <animate attributeName="opacity" from="0" to="1" dur="1s" begin="13s" fill="freeze"  />
+        <animate attributeName="opacity" from="1" to="0" dur="1s" begin="14s" fill="freeze"  />
+    
+      </path>
+    
+    </g>
+    
+    
+    
+    
+    
+    
+    
+    
+      <!-- nav dia -->
+    <path stroke="#a0fa96" transform="translate(320,177)" class="menu-button,svraf" d="M100,60 Q115,75 140,100 Q115,125 100,140 Q85,125 60,100 Q85,75 100,60" data-option="000CURRENT_TESTING_HOME.html" opacity="0.0">
+    <animate attributeName="opacity" from="0" to="1" dur="3s" begin="8s" fill="freeze"  />
+    <animate attributeName="opacity" from="1" to="0" dur="3s" begin="12.5s" fill="freeze"  />
+    </path>
+    <!-- Right Button -->
+    <path stroke="#a0fa96" transform="translate(320,177)" class="menu-button,svraf" d="M140,100 Q155,115 180,140 Q155,165 140,180 Q125,165 100,140 Q115,125 140,100" data-option="000VOLUMES_TESTING.html" opacity="0.0">
+    <animate attributeName="opacity" from="0" to="1" dur="3s" begin="8s" fill="freeze"  />
+    <animate attributeName="opacity" from="1" to="0" dur="3s" begin="12.5s" fill="freeze"  />
+    <!-- Bottom Button --></path>
+    <path stroke="#a0fa96" transform="translate(320,177)" class="menu-button,svraf" d="M100,140 Q115,155 140,180 Q115,205 100,220 Q85,205 60,180 Q85,155 100,140" data-option="index.html" opacity="0.0">
+    <animate attributeName="opacity" from="0" to="1" dur="3s" begin="8s" fill="freeze"  />
+    <animate attributeName="opacity" from="1" to="0" dur="3s" begin="12.5s" fill="freeze"  />
+    <!-- Left Button --></path>
+    <path stroke="#a0fa96" transform="translate(320,177)" class="menu-button,svraf" d="M60,100 Q75,115 100,140 Q75,165 60,180 Q45,165 20,140 Q45,115 60,100" data-option="000GSO_TESTING.html" opacity="0.0">
+    <animate attributeName="opacity" from="0" to="1" dur="3s" begin="8s" fill="freeze"  />
+    <animate attributeName="opacity" from="1" to="0" dur="3s" begin="12.5s" fill="freeze"  />
+</path>
+
+  <!-- moving the navs
+for home 390,180
+for PAB 390,395   162,164.58
+for left 284,287
+for narticles 497,287 207.08,119.58
+-->
+      <!-- changes over time -->
+ 
+<!--           use transform="rotate(r x y)" rotate/spin
+   
+   <text x="55" y="366" font-family="trebuchet ms" position="absolute" font-size="0" fill="#fff" opacity="0" transform="rotate(-30 55 366)">
+  Changes
+  <animate
+  attributeName="font-size"
+  from="0"
+  to="222"
+  begin="24s"
+  dur="2s"
+  fill="freeze"
+  repeatCount="indefinite" />
+  <animate attributeName="opacity" from="0" to="1" dur="1s" begin="24s" fill="freeze"  />
+  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="25s" fill="freeze" />
+</text>
+
+<text x="55" y="99" font-family="trebuchet ms" position="absolute" font-size="0" fill="#fff" opacity="0" transform="rotate(90 50 99)">
+  Over
+  <animate
+  attributeName="font-size"
+  from="0"
+  to="222"
+  begin="25.5s"
+  dur="2s"
+  fill="freeze"
+  repeatCount="indefinite" />
+  <animate attributeName="opacity" from="0" to="1" dur="1s" begin="25.5s" fill="freeze"  />
+  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="26.5s" fill="freeze" />
+</text>
+
+<text x="66" y="255" font-family="trebuchet ms" position="absolute" font-size="0" fill="#fff" opacity="0">
+  Time
+  <animate
+  attributeName="font-size"
+  from="0"
+  to="222"
+  begin="27s"
+  dur="2s"
+  fill="freeze"
+  repeatCount="indefinite" />
+  <animate attributeName="opacity" from="0" to="1" dur="1s" begin="27s" fill="freeze"  />
+  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="28s" fill="freeze" /> 
+</text>
+-->
+<!-- pixel compare -->
+
+<image href="pixelex.jpg" x="0" y="555" height="222px" width="222px" opacity="0">
+  <animate attributeName="opacity" from="0" to="1" dur="3s" begin="12s" fill="freeze"  /><!--27s here-->
+  </image>
+
+<path transform="scale(1)translate(155,533)"
+style="fill:#fff" opacity="0"
+       d="M 192.1521,164.57736 C 178.00578,160.48119 160.55711,150.61851 146.77605,138.929 143.1148,135.82342 134.34529,126.99414 131.08383,123.12979 120.16553,110.19331 112.12797,96.73238 106.61395,82.14882 102.72578,71.86535 99.476269,58.15955 98.474716,47.81914 L 98.28892,45.90091 h 48.05607 48.05606 v 59.66354 c 0,32.81494 -0.0298,59.65505 -0.0661,59.64467 -0.0364,-0.0104 -1.01865,-0.29467 -2.18281,-0.63176 z m -90.49846,-21.80711 c -3.030718,-1.37667 -3.92271,-4.98953 -1.879407,-7.6122 0.523487,-0.67192 0.888057,-1.32481 0.810147,-1.45087 -0.0779,-0.12605 -2.545639,-0.23287 -5.483848,-0.23736 -2.938208,-0.004 -6.196171,-0.11913 -7.239921,-0.25475 -4.283575,-0.5566 -8.910724,-2.81033 -10.993702,-5.35466 -1.882023,-2.29887 -3.676123,-6.91559 -3.729082,-9.59596 -0.03958,-2.00339 0.815017,-3.46622 2.657829,-4.54945 1.101754,-0.64763 1.534827,-0.74222 3.398055,-0.74222 1.853321,0 2.341231,0.10528 3.693914,0.79707 1.032319,0.52795 1.825389,1.17674 2.348873,1.92157 0.732144,1.04171 0.803484,1.35313 0.969012,4.23001 0.348716,6.06067 1.714754,7.33293 8.593815,8.00383 3.914759,0.3818 5.940205,0.21712 5.937475,-0.48275 -0.001,-0.24575 -0.24418,-0.804 -0.54048,-1.24056 -1.942841,-2.86249 -1.687971,-5.28257 0.7134,-6.77402 1.43646,-0.89216 3.69595,-0.84975 5.51736,0.10356 2.16059,1.13082 14.5521,10.87476 14.5521,11.44289 0,0.52278 -2.04827,2.2103 -9.65486,7.95445 -2.39975,1.81218 -4.84835,3.52975 -5.44135,3.81681 -1.3404,0.64888 -2.83584,0.65758 -4.22933,0.0246 z M 18.373528,109.68426 c -0.553101,-0.11243 -1.132716,-0.3315 -1.288031,-0.48682 -0.294378,-0.29438 -1.297509,-4.21276 -3.020489,-11.79849 -0.985885,-4.34053 -0.99972,-4.47128 -0.51099,-4.82865 0.754648,-0.55181 2.867573,-0.47498 3.409625,0.12398 0.280059,0.30946 0.833826,2.42909 1.496216,5.72698 0.578382,2.87962 1.051602,5.27791 1.051602,5.32954 0,0.0516 0.106326,0.0939 0.236276,0.0939 0.365776,0 0.521406,-0.56826 1.620411,-5.91669 0.644486,-3.13645 1.193425,-5.17622 1.477492,-5.49011 0.749527,-0.82821 3.348098,-0.52665 3.71566,0.4312 0.08641,0.22519 -0.586851,3.4119 -1.496142,7.08157 -2.092897,8.44643 -2.297896,9.12384 -2.850618,9.41962 -0.701416,0.37535 -2.725338,0.54081 -3.841012,0.31401 z m 26.755037,-0.38786 c -2.62441,-0.70666 -4.213537,-2.82438 -4.760778,-6.34436 -0.584321,-3.75851 0.423201,-7.51728 2.488936,-9.28547 1.262062,-1.08028 2.555885,-1.46358 4.940247,-1.46358 2.323951,0 3.659401,0.60149 4.784825,2.15509 1.474531,2.03553 1.307185,3.76088 -0.395769,4.08035 -1.479021,0.27747 -2.231101,-0.0447 -2.68814,-1.15163 -0.852435,-2.06449 -1.879359,-2.43605 -3.264665,-1.18121 -0.695515,0.63002 -0.844804,1.0173 -1.113041,2.88753 -0.567412,3.95612 0.36843,7.23279 2.065742,7.23279 0.535633,0 2.488039,-1.8808 2.488039,-2.39678 0,-0.10167 0.350186,-0.32991 0.77819,-0.5072 0.978172,-0.40517 2.524945,0.038 2.958197,0.84751 0.461106,0.86159 -0.164023,2.46678 -1.468797,3.77155 -1.623131,1.62313 -4.035975,2.10315 -6.812986,1.35541 z m 29.813104,0.13787 c -2.223627,-0.58667 -3.775268,-2.1804 -4.500526,-4.6226 -0.577135,-1.94343 -0.514117,-5.81491 0.128519,-7.89552 1.05138,-3.40397 3.128791,-4.85382 6.696628,-4.67365 2.810774,0.14194 4.220752,1.04647 5.480587,3.51592 0.913305,1.79021 0.926042,1.86103 0.926042,5.14914 0,2.9212 -0.07546,3.49776 -0.609497,4.65689 -0.735346,1.59607 -1.694413,2.65074 -3.039507,3.3425 -1.107482,0.56956 -3.845396,0.85364 -5.082246,0.52732 z m 3.394789,-3.74957 c 0.936691,-0.7368 1.232276,-2.00193 1.233533,-5.27963 7.93e-4,-2.11811 -0.108839,-2.99745 -0.461545,-3.70133 -0.868786,-1.73379 -2.869414,-1.7404 -3.878379,-0.0128 -0.587602,1.00611 -0.898538,4.80933 -0.571492,6.99022 0.33001,2.20065 2.159974,3.19754 3.677883,2.00355 z m 7.982294,3.78933 c -0.291042,-0.0715 -0.663961,-0.23925 -0.828712,-0.37269 -0.435057,-0.3524 -0.794951,-14.7663 -0.387689,-15.52727 0.423567,-0.79144 2.617351,-1.37186 5.167027,-1.36706 3.677179,0.007 5.798973,1.05779 6.826676,3.38108 0.429556,0.97108 0.508206,1.60137 0.416901,3.34096 -0.107561,2.04929 -0.296735,2.65725 -1.415894,4.55036 -0.486968,0.82373 -0.48624,0.82944 0.36249,2.85137 0.972071,2.31576 0.87076,2.90756 -0.542483,3.16886 -1.641591,0.30353 -2.381131,-0.10145 -3.215174,-1.76064 -0.718154,-1.42864 -0.814888,-1.51309 -1.733021,-1.51309 -1.229839,0 -1.607413,0.38088 -1.607413,1.62151 0,1.58172 -1.015899,2.12481 -3.042708,1.62661 z m 5.950815,-7.70303 c 1.405464,-1.40546 1.314119,-4.62856 -0.150085,-5.2957 -0.805177,-0.36686 -1.952093,-0.38704 -2.493438,-0.0439 -0.320083,0.20291 -0.380693,0.77562 -0.313251,2.95991 0.04599,1.48958 0.142317,2.80329 0.214053,2.91936 0.07173,0.11607 0.549278,0.21104 1.061207,0.21104 0.66957,0 1.141463,-0.21068 1.681514,-0.75074 z M 28.6304,109.16951 c -1.276139,-0.56553 -1.291259,-0.66993 -1.244351,-8.59144 0.04371,-7.38143 0.04945,-7.45264 0.632806,-7.84591 0.449337,-0.30293 1.626754,-0.41758 4.973735,-0.48432 4.158192,-0.0829 4.422503,-0.058 5.109247,0.48223 0.814414,0.64062 0.903918,1.26834 0.337119,2.36441 -0.509042,0.98438 -0.818091,1.07726 -3.584403,1.07726 -2.598264,0 -3.172259,0.28109 -3.172259,1.55348 0,1.12031 0.445932,1.35694 2.557151,1.35694 2.163397,0 2.469933,0.24296 2.469933,1.95767 0,1.14969 -0.347885,1.35628 -2.695604,1.6008 -1.997533,0.20805 -2.40402,0.52529 -2.283386,1.78206 l 0.0842,0.87717 h 2.864086 c 3.244982,0 3.711228,0.25617 3.563836,1.9581 -0.138281,1.59671 -0.845867,1.86934 -5.241062,2.01933 -2.107983,0.0719 -4.074951,0.0234 -4.371046,-0.10778 z m 31.359731,-0.24666 c -0.571082,-0.46243 -0.594262,-0.66763 -0.709406,-6.27975 -0.08315,-4.05271 -0.213119,-5.86154 -0.431128,-6.00019 -0.171651,-0.10917 -1.056235,-0.20031 -1.96574,-0.20254 -1.98882,-0.005 -2.71198,-0.53509 -2.71198,-1.98842 0,-1.82371 0.190993,-1.87695 7.419314,-2.06808 7.516381,-0.19874 7.661936,-0.16492 7.661936,1.78028 0,1.91865 -0.583679,2.37891 -3.216976,2.53676 l -2.206982,0.13229 -0.06619,5.82083 c -0.06321,5.55819 -0.09139,5.84173 -0.624623,6.28385 -0.730756,0.60591 -2.391193,0.59798 -3.148222,-0.015 z">
+ <animate attributeName="opacity" from="0" to="1" dur="0.01s" begin="12s" fill="freeze"  />
+ </path>
+
+ <circle cx="386" cy="575" r="133" fill="#fff" opacity="0">
+  <animate attributeName="opacity" from="0" to="1" dur="0.01s" begin="12s" fill="freeze"  />
+  </circle>
+
+  <text x="0" y="477" font-family="Courier New, monospace" position="absolute" fill="#fff" font-size="33" 
+  transform="rotate(-12.5 44 88)" fill="#a0fa96" opacity="0">
+    Vector What?
+    <animate attributeName="opacity" from="0" to="1" dur="1s" begin="12s" fill="freeze"  />
+  </text>
+
+  <g
+     id="go_ins"
+     transform="translate(0.040588,0.522629) scale(0.4)" opacity="0">
+     <animate attributeName="opacity" from="0" to="1" dur="1s" begin="12s" fill="freeze"  />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 81.975638,100.01027 c -10.888102,2.29377 -20.870999,8.65017 -27.555684,17.54552 -6.684685,8.89534 -10.013149,20.25243 -9.187523,31.34884 0.825626,11.09642 5.798177,21.83587 13.725679,29.644 7.927502,7.80813 18.741162,12.61717 29.848828,13.27435 7.184648,0.42508 14.483772,-0.85609 21.027512,-3.85265 6.54373,-2.99657 12.31123,-7.71804 16.40803,-13.63548 2.55575,-3.69155 4.47346,-7.87714 5.18609,-12.31014 0.71264,-4.43301 0.17056,-9.12201 -1.90707,-13.10231 -1.74713,-3.34714 -4.56014,-6.1276 -7.92738,-7.83566 -3.36724,-1.70806 -7.27241,-2.33546 -11.00522,-1.76807 -3.73281,0.56739 -7.27518,2.32681 -9.98282,4.95825 -2.707634,2.63145 -4.567419,6.12217 -5.241092,9.83727"
+       id="path7961" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 140.99809,118.31816 c -4.9003,2.86149 -8.59246,7.72263 -10.03411,13.21105 -1.44166,5.48841 -0.61506,11.5365 2.24642,16.43681 2.86149,4.9003 7.72264,8.59245 13.21105,10.03411 5.48841,1.44166 11.53651,0.61506 16.43681,-2.24643 4.9003,-2.86149 8.59246,-7.72263 10.03411,-13.21105 1.44166,-5.48841 0.61506,-11.5365 -2.24643,-16.4368 -2.86148,-4.90031 -7.72263,-8.59246 -13.21104,-10.03412 -5.48841,-1.44166 -11.53651,-0.61506 -16.43681,2.24643 z"
+       id="path8794" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 169.14306,102.46954 c 3.32972,13.78802 12.26415,26.13561 24.31944,33.61001 0.4514,0.27987 0.90689,0.55317 1.36626,0.81976"
+       id="path8802" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 159.57923,81.155878 3.27903,5.738294"
+       id="path8806" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 205.75884,131.16101 -26.50545,-28.69147 c 0,0 12.84285,-20.767158 32.24375,-1.36626 19.4009,19.4009 19.67415,19.4009 19.67415,19.4009"
+       id="path8810" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 228.98527,75.417584 c -4.18493,3.934548 -6.72438,9.567647 -6.90142,15.308983 -0.17705,5.741336 2.01049,11.520203 5.94504,15.705133 3.93454,4.18493 9.56764,6.72438 15.30898,6.90142 5.74134,0.17705 11.5202,-2.01049 15.70513,-5.94504 4.18493,-3.93455 6.72438,-9.567647 6.90142,-15.308983 0.17705,-5.741336 -2.01049,-11.520202 -5.94504,-15.70513 -3.93454,-4.184928 -9.56764,-6.724379 -15.30898,-6.901425 -5.74134,-0.177045 -11.5202,2.010494 -15.70513,5.945042 z"
+       id="path8812" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 260.40927,76.510592 c 0,0 74.32457,121.597188 15.02886,110.393858 -59.29571,-11.20334 -58.47595,-10.93009 -58.47595,-10.93009"
+       id="path8820" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 304.40286,58.475952 c -0.49934,-4.949042 -3.54772,-9.571828 -7.90001,-11.980136 -4.35228,-2.408309 -9.88822,-2.535598 -14.3466,-0.329874 -4.45838,2.205723 -7.71601,6.683514 -8.44229,11.604374 -0.72628,4.920861 1.09887,10.148828 4.72994,13.548486 2.7289,2.554986 6.2826,4.033976 9.83708,5.19179 7.21349,2.349678 14.76452,3.594746 21.89127,6.195702 3.56337,1.300478 7.02219,2.946108 10.10464,5.156853 3.08244,2.210745 5.78527,5.004693 7.62565,8.321597 3.33334,6.007646 3.5572,13.636546 0.58185,19.829306 -2.97535,6.19277 -9.0711,10.78538 -15.84429,11.93728 -6.77319,1.15191 -14.04444,-1.1674 -18.89968,-6.02843 -4.85525,-4.86103 -7.16591,-12.13503 -6.00594,-18.90685"
+       id="path8822" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 133.89354,205.75884 c -3.57686,3.32648 -5.76231,8.10494 -5.93935,12.98634 -0.17705,4.8814 1.65648,9.80562 4.98296,13.38249 3.32649,3.57686 8.10494,5.7623 12.98634,5.93935 4.8814,0.17705 9.80563,-1.65649 13.38249,-4.98297 3.57686,-3.32648 5.76231,-8.10494 5.93935,-12.98634 0.17705,-4.8814 -1.65648,-9.80562 -4.98297,-13.38249 -3.32648,-3.57686 -8.10493,-5.7623 -12.98633,-5.93935 -4.8814,-0.17705 -9.80563,1.65649 -13.38249,4.98297 z"
+       id="path8826" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 179.79989,221.60746 -14.48236,-19.67415 c 0,0 1.36626,-27.59846 19.67415,-2.45927 18.30789,25.1392 19.4009,25.1392 19.4009,25.1392"
+       id="path8830" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 81.42913,259.043 -5.19179,62.57474"
+       id="path8832" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="M 60.935222,278.17065 108.20784,271.6126"
+       id="path8834" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 92.905719,281.44968 -2.459269,42.08082 1.36626,-19.9474 c 0,0 16.12188,-10.93009 15.02887,7.92431 -1.09301,18.8544 -1.09301,19.4009 -1.09301,19.4009"
+       id="path8836" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 118.59142,304.1296 v 28.41822"
+       id="path8838" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 119.41117,283.63569 -0.27325,4.37204"
+       id="path8840" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 145.91663,307.68188 c 0.42901,-2.42706 -0.11655,-5.01244 -1.48963,-7.05922 -1.37308,-2.04679 -3.55836,-3.53216 -5.9668,-4.05573 -2.40843,-0.52358 -5.01316,-0.0795 -7.11206,1.2125 -2.0989,1.29201 -3.66858,3.41755 -4.28591,5.80367 -0.68364,2.6424 -0.19874,5.51994 1.09301,7.92431 1.01862,1.89597 2.50683,3.50756 4.15712,4.88916 1.65029,1.38161 3.46759,2.54755 5.27877,3.71025 1.81119,1.16271 3.62751,2.33041 5.27523,3.71507 1.64773,1.38466 3.1317,3.00067 4.14328,4.9004 1.05989,1.99045 1.57441,4.26787 1.47315,6.52064 -0.10126,2.25278 -0.81802,4.47486 -2.05221,6.36219 -1.23418,1.88733 -2.98249,3.43486 -5.00568,4.43081 -2.02319,0.99596 -4.31585,1.43768 -6.56426,1.26473 -2.2484,-0.17295 -4.44653,-0.96012 -6.29359,-2.25379 -1.84707,-1.29367 -3.33813,-3.09038 -4.26915,-5.14426 -0.93101,-2.05388 -1.29949,-4.35945 -1.05502,-6.6012 0.24447,-2.24176 1.10125,-4.4137 2.45309,-6.21863"
+       id="path8842" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 173.78834,293.19952 c -5.29192,13.64138 -5.29192,29.2592 0,42.90058 0.56252,1.45004 1.19524,2.89986 2.18602,4.09878 1.29476,1.56675 3.17333,2.6267 5.17463,2.98156 2.0013,0.35486 4.11047,0.0128 5.92399,-0.90495 1.81352,-0.91774 3.32749,-2.3992 4.33575,-4.164 1.00827,-1.7648 1.51434,-3.80442 1.50726,-5.83692 -0.002,-0.57065 -0.0426,-1.14962 0.0881,-1.70511 0.0653,-0.27775 0.17436,-0.54765 0.34195,-0.77857 0.16759,-0.23092 0.39595,-0.42161 0.663,-0.52209 0.34181,-0.12861 0.73184,-0.10184 1.06919,0.038 0.33735,0.13988 0.62388,0.38661 0.84495,0.67729 0.44214,0.58138 0.62268,1.31351 0.81838,2.0172 0.80367,2.88977 2.07765,5.72098 4.18399,7.8564 1.05317,1.06771 2.30726,1.94735 3.70036,2.50272 1.3931,0.55537 2.92689,0.77984 4.412,0.57096 1.64261,-0.23103 3.1909,-0.98748 4.46302,-2.05203 1.27212,-1.06456 2.2756,-2.4286 3.02459,-3.90866 1.49797,-2.96011 1.97832,-6.31794 2.34946,-9.61468 1.56229,-13.87743 1.56229,-27.93014 0,-41.80757"
+       id="path8846" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 228.98527,320.25148 c 0.0139,-1.94297 0.61724,-3.87786 1.71008,-5.48442 1.09284,-1.60656 2.67087,-2.8784 4.47291,-3.60503 1.80204,-0.72663 3.82093,-0.90516 5.72252,-0.50603 1.90158,0.39913 3.67831,1.37432 5.03612,2.76418 1.16813,1.1957 2.01688,2.67386 2.64739,4.22198 0.63052,1.54813 1.05193,3.17218 1.45139,4.79534 0.70716,2.87343 1.35532,5.79853 1.28196,8.75679 -0.0734,2.95827 -0.93567,5.99092 -2.92147,8.18484 -1.29913,1.43529 -3.04462,2.45816 -4.9288,2.90273 -1.88418,0.44458 -3.89885,0.31085 -5.71235,-0.36666 -1.81349,-0.67752 -3.41964,-1.89459 -4.57296,-3.44947 -1.15331,-1.55488 -1.85125,-3.44126 -2.00077,-5.3714 -0.1802,-2.32617 0.44399,-4.70708 1.74226,-6.64565 1.29827,-1.93857 3.26221,-3.42225 5.4818,-4.14127 2.21958,-0.71902 4.68044,-0.66873 6.8688,0.14037 2.18836,0.80909 4.09005,2.37176 5.30804,4.36175"
+       id="path8850" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 262.59528,312.60042 c -2.78875,3.47573 -4.09521,8.10258 -3.53623,12.5236 0.55898,4.42101 2.97593,8.57708 6.54201,11.24933 3.01709,2.26086 6.82921,3.45389 10.5944,3.25978 3.7652,-0.1941 7.45187,-1.78528 10.1366,-4.43227 2.68473,-2.64699 4.33234,-6.33272 4.45842,-10.1008 0.12608,-3.76808 -1.28441,-7.57514 -3.87576,-10.31362 -0.17709,-0.18715 -0.35935,-0.36941 -0.5465,-0.54651"
+       id="path8854" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 290.74025,321.89099 c 1.86202,17.52479 3.04729,35.12147 3.55228,52.73766 0.0895,3.12066 0.15716,6.25261 -0.17828,9.35647 -0.33544,3.10387 -1.08707,6.19572 -2.55424,8.95142 -2.47091,4.64095 -7.00167,8.13532 -12.11809,9.34613 -5.11641,1.21081 -10.7328,0.11778 -15.02171,-2.92344 -4.2889,-3.04122 -7.17851,-7.97971 -7.7286,-13.20859 -0.5501,-5.22888 1.24854,-10.66058 4.81066,-14.52776"
+       id="path8858" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="M 157.11997,408.78516 64.487499,390.20402 98.644013,418.62224"
+       id="path8870" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="M 65.059578,390.23575 100.8556,376.8464"
+       id="path8872" />
+  </g>
+
+
+  <g
+  id="narts"
+  transform="translate(455,219) scale(0.4)" opacity="0">
+  <animate attributeName="opacity" from="0" to="1" dur="1s" begin="12s" fill="freeze"  />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 92.632467,112.30662 12.296343,72.95831 -33.336756,-69.67929 9.563824,73.77808 0.273252,0.27325"
+    id="path2383" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 129.24825,179.25339 c 0,0 3.00577,-38.52855 -6.2848,-32.24375 -9.29057,6.2848 -9.29057,6.2848 -9.29057,6.2848"
+    id="path2393" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 129.24825,162.58501 c 0,0 -19.67415,7.65106 -10.11033,12.5696 9.56383,4.91853 9.83708,4.91853 9.83708,4.91853 l -1.09301,-0.27325"
+    id="path2395" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 134.98654,147.82939 7.37781,32.24375"
+    id="path2397" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 135.53305,148.64915 c 0,0 10.38358,-7.65106 11.20334,-2.18602 0.81975,5.46505 0.5465,5.46505 0.5465,5.46505"
+    id="path2403" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 160.12574,176.24761 -0.27325,0.27326 -7.37781,-33.06351 c 0,0 6.8313,-13.38935 10.65683,-2.45927 3.82553,10.93009 3.82553,10.93009 3.82553,10.93009"
+    id="path2405" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 194.82876,174.33485 c 0,0 -5.46504,-43.99359 -13.38935,-34.42976 -7.92431,9.56382 -7.92431,9.56382 -7.92431,9.56382"
+    id="path2407" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 191.27648,158.75948 c 0,0 -34.15651,10.93009 -15.84862,12.5696 18.30789,1.63951 18.30789,1.63951 18.30789,1.63951"
+    id="path2409" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 195.37526,93.452223 219.6947,174.6081"
+    id="path2519" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 192.36949,138.81207 221.33421,128.975"
+    id="path2521" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 229.53178,136.62606 8.74406,33.0635"
+    id="path2523" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 225.15974,119.13792 0.54651,3.82553"
+    id="path2525" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 236.36308,134.98654 23.22643,28.96473 -1.36626,-0.27325 1.36626,0.27325 2.73252,-34.15652"
+    id="path2527" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 273.25211,143.73061 21.04042,-4.09878 c 0,0 -5.46505,-23.22643 -21.04042,4.09878 z"
+    id="path2529" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 272.97886,144.00387 c 0,0 -9.56382,28.69147 10.38358,21.04041 19.94741,-7.65106 20.22066,-7.65106 20.22066,-7.65106"
+    id="path2533" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 143.45736,251.39195 1.63951,-56.83644 29.23798,53.28416"
+    id="path2535" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 144.00386,231.17129 16.12188,-7.65106"
+    id="path2537" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 181.4394,242.64788 -13.93585,-25.6857 c 0,0 13.93585,-15.30212 14.48236,-5.19179 0.5465,10.11033 0.5465,10.11033 0.5465,10.11033"
+    id="path2539" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 183.62542,189.36372 24.04619,50.82489 v -0.27325"
+    id="path2541" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 187.99745,222.70047 18.03464,-15.02886"
+    id="path2543" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 215.86917,212.04364 8.19756,21.58692"
+    id="path2545" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 209.03787,194.55551 2.73252,4.09878"
+    id="path2547" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 235.54332,204.66583 c -2.77481,0.72225 -5.28783,2.41184 -7.00383,4.70891 -1.71601,2.29708 -2.6234,5.18613 -2.52892,8.05185 0.0945,2.86571 1.19017,5.68872 3.05374,7.86779 1.86357,2.17907 4.48241,3.69948 7.29877,4.2374 2.99763,0.57255 6.19622,0.0226 8.8305,-1.51818 2.63429,-1.54081 4.68151,-4.0592 5.65186,-6.95264"
+    id="path2549" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 248.65942,181.16615 18.8544,45.63311"
+    id="path2553" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 275.98464,206.30535 20.22065,-5.46505 c 0,0 -16.94163,-21.58691 -20.22065,5.46505 z"
+    id="path2555" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 276.25789,206.03209 c 0,0 -3.82553,24.59269 12.29634,17.76139 16.12188,-6.8313 16.12188,-6.8313 16.12188,-6.8313"
+    id="path2557" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 321.89099,182.53241 c 0.04,-3.09969 -1.53494,-6.17612 -4.07301,-7.95597 -2.53808,-1.77985 -5.96704,-2.21247 -8.86765,-1.11879 -2.90062,1.09367 -5.19034,3.68251 -5.92146,6.69501 -0.73113,3.0125 0.11715,6.36293 2.19374,8.66455 1.11872,1.23995 2.54885,2.1695 4.06503,2.86966 1.51617,0.70017 3.12331,1.18086 4.73388,1.62255 3.22114,0.88338 6.58745,1.66999 9.23573,3.70535 1.58325,1.21682 2.84281,2.85095 3.61639,4.69185 0.77359,1.8409 1.05938,3.88422 0.82055,5.86672 -0.23883,1.9825 -1.00171,3.8995 -2.19036,5.50401 -1.18865,1.60451 -2.80025,2.89275 -4.62719,3.69876 -1.82694,0.806 -3.8649,1.12786 -5.85131,0.92411 -1.98641,-0.20375 -3.91659,-0.93263 -5.54186,-2.09273 -1.62527,-1.1601 -2.9418,-2.74869 -3.77997,-4.56109 -0.83817,-1.81241 -1.196,-3.84436 -1.02739,-5.83406"
+    id="path2559" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 121.05069,90.719702 c 0,0 15.84862,-32.517002 -17.76139,-54.377171 C 69.679289,14.482362 69.679289,14.482362 69.679289,14.482362 l 0.819757,0.273252 3.005773,22.953178"
+    id="path2563" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 69.679289,14.755614 89.899946,13.935858"
+    id="path2565" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 218.60169,96.457996 c 0,0 -57.92945,-48.365624 20.22066,-56.836439 78.1501,-8.470816 78.1501,-8.197564 78.1501,-8.197564 l -10.93008,17.488135"
+    id="path2567" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 316.6992,31.697245 301.67033,22.406673"
+    id="path2569" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 60.388717,166.13729 305.49586,137.71907"
+    id="path2571" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 246.74666,118.04491 -15.84862,-18.03464 22.95317,7.37781 -15.02886,-15.57537"
+    id="path2573" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="m 251.39195,94.271979 c -1.07306,0.75114 -1.83029,1.939394 -2.05792,3.229297 -0.22763,1.289903 0.0771,2.665574 0.82828,3.738624 0.75114,1.07306 1.9394,1.8303 3.2293,2.05793 1.2899,0.22763 2.66557,-0.0772 3.73863,-0.82829 1.07306,-0.75114 1.83029,-1.93939 2.05792,-3.229297 0.22763,-1.289903 -0.0771,-2.66557 -0.82828,-3.738629 -0.75114,-1.073058 -1.9394,-1.830292 -3.2293,-2.057922 -1.2899,-0.22763 -2.66557,0.07715 -3.73863,0.828287 z"
+    id="path2575" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 256.31048,75.144331 278.99041,99.46377"
+    id="path2579" />
+ <path
+    style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+    d="M 261.22902,91.539458 274.07187,78.423357"
+    id="path2583" />
+</g>
+
+<g
+     id="rasteract"
+     transform="translate(50,747) scale(0.4)" opacity="0">
+  <animate attributeName="opacity" from="0" to="1" dur="1s" begin="12s" fill="freeze"  />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 72.456909,153.22221 8.115173,57.19265"
+       id="path1713" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 73.036564,154.38152 c 0,0 7.921955,-15.07104 14.491382,-6.18299 6.569426,8.88805 6.569426,8.88805 6.569426,8.88805"
+       id="path1715" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 121.53439,200.17429 -9.4677,-30.72173 c 0,0 -9.46771,-9.85414 -12.172765,-1.73897 -2.705058,8.11518 -2.705058,8.11518 -2.705058,8.11518"
+       id="path1717" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 116.12427,184.13716 c 0,0 -27.823451,15.07103 -10.62701,15.65069 17.19644,0.57965 17.19644,0.57965 17.19644,0.57965"
+       id="path1719" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 138.92405,157.2798 c -0.90675,-2.26722 -2.75234,-4.14204 -5.00503,-5.08429 -2.2527,-0.94226 -4.8835,-0.93983 -7.13445,0.007 -2.25095,0.94642 -4.09307,2.82465 -4.99562,5.09355 -0.90255,2.26889 -0.85392,4.89925 0.13188,7.13323 0.98695,2.23658 2.84244,4.00905 4.94588,5.25479 2.10345,1.24575 4.45607,2.00656 6.81646,2.64288 2.3604,0.63631 4.75597,1.15971 7.05978,1.97751 2.30382,0.81779 4.53787,1.95176 6.29627,3.65011 2.57673,2.48874 3.96713,6.16905 3.63066,9.73559 -0.33646,3.56653 -2.40885,6.93876 -5.46452,8.80859 -3.05567,1.86982 -7.02674,2.17506 -10.3133,0.74962 -1.64328,-0.71272 -3.10877,-1.83314 -4.22225,-3.23617 -1.11348,-1.40304 -1.87225,-3.08634 -2.17956,-4.85096 -0.211,-1.21157 -0.211,-2.45958 0,-3.67115"
+       id="path1721" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 151.29003,134.48002 20.67437,57.77231"
+       id="path1779" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 149.74428,166.55428 21.64046,-10.43379"
+       id="path1781" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 179.11348,171.19152 c 0.38644,0.96609 13.91173,-4.44403 13.91173,-4.44403 0,0 -13.52529,-18.54896 -13.91173,4.44403 z"
+       id="path1783" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 179.49992,171.77117 c 0,0 2.31862,20.28794 11.01345,12.17276 8.69482,-8.11517 8.69482,-8.11517 8.69482,-8.11517"
+       id="path1785" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 206.55049,157.2798 9.85414,26.08448"
+       id="path1787" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 207.90302,157.47301 c 0,0 12.94564,-18.16253 16.81001,-6.95586 3.86436,11.20667 3.86436,11.20667 3.86436,11.20667"
+       id="path1789" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 155.92727,242.2959 c 0,0 2.51184,-21.25402 12.17276,-13.13885 9.66092,8.11517 9.66092,8.11517 9.66092,8.11517 7.14908,23.95909 6.95586,23.76587 6.95586,23.76587"
+       id="path1791" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 179.69313,246.93314 c 0,0 -34.19966,13.33208 -14.87782,14.10495 19.32185,0.77287 19.51507,0.77287 19.51507,0.77287 v -0.19322"
+       id="path1793" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 200.17429,226.25877 c -5.44444,-0.20897 -10.92857,2.25608 -14.38652,6.46656 -3.45795,4.21049 -4.80988,10.06919 -3.54652,15.36914 1.26336,5.29996 5.11284,9.91879 10.09835,12.11659 4.9855,2.1978 10.99192,1.92383 15.75664,-0.71872 2.09135,-1.15988 3.94403,-2.74789 5.41012,-4.63724"
+       id="path1795" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 208.86912,200.56072 24.73195,53.71472"
+       id="path1799" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 212.54027,234.56717 19.51506,-16.61679"
+       id="path1801" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 241.32981,231.66889 c -0.77259,2.06699 -0.89599,4.37134 -0.34856,6.50902 0.54742,2.13768 1.76322,4.09908 3.4342,5.54031 1.67099,1.44123 3.78967,2.35581 5.98456,2.58338 2.1949,0.22757 4.45615,-0.23289 6.38727,-1.30064 1.67517,-0.92623 3.09828,-2.3033 4.07908,-3.94711 0.9808,-1.64382 1.51679,-3.5502 1.53632,-5.46428 0.0195,-1.91409 -0.47744,-3.831 -1.4245,-5.49449 -0.94705,-1.66349 -2.34176,-3.06931 -3.99768,-4.02953"
+       id="path1803" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 262.77706,216.0182 c 0,0 -1.54575,-19.51506 8.11517,-12.17276 9.66092,7.3423 9.27448,7.3423 9.27448,7.3423"
+       id="path1807" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 279.78027,210.8013 9.08127,18.16253 -0.38644,-0.57965"
+       id="path1809" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 282.67855,218.1436 c 0,0 -24.73196,16.61678 -9.4677,13.71851 15.26426,-2.89828 15.07104,-2.89828 15.07104,-2.89828"
+       id="path1811" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 279.58706,179.88635 21.64046,46.37242"
+       id="path1813" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 297.94281,173.31693 17.19644,45.40633"
+       id="path1815" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 319.39005,197.27601 c 0,0 0,23.95908 10.4338,16.42357 10.43379,-7.53552 10.43379,-7.53552 10.43379,-7.53552"
+       id="path1817" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 329.82385,191.09302 c 0,0 34.5861,39.41656 8.69483,41.34874 -25.89127,1.93219 -25.89127,1.93219 -25.89127,1.93219"
+       id="path1821" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="M 253.50258,171.9644 251.76361,84.822888 237.46545,105.49726"
+       id="path1919" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2.13543"
+       d="m 251.7636,83.470359 16.42357,18.162531"
+       id="path1921" />
+  </g>
+
+
+    
+  </svg> 
+
+
+
+</div>
+
+
+</script>
+
+
+<!--************** MENU and EOF*********************************************************************-->
+
+
+<!-- BUTTONS     ******************************************************************-->
+
+
+
+<svg id="bezierMenu" class="svraf" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 300" style="display:none;" stroke="#a0fa96">
+  
+   
+  <!-- Top Button -->
+    <path transform="translate(71, 0) scale(2.4)" stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" opacity="0.77"/>
+    <path class="menu-button" d="M100,60 Q115,75 140,100 Q115,125 100,140 Q85,125 60,100 Q85,75 100,60" data-option="home.html" opacity="0.77"/>
+    
+    <!-- Right Button -->
+    <path transform="translate(182, 111) scale(2.4)" stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" opacity="0.77"/>
+    <path class="menu-button" d="M140,100 Q155,115 180,140 Q155,165 140,180 Q125,165 100,140 Q115,125 140,100" data-option="narts.html" opacity="0.77"/>
+    
+    <!-- Bottom Button -->
+    <path class="menu-button" d="M100,140 Q115,155 140,180 Q115,205 100,220 Q85,205 60,180 Q85,155 100,140" data-option="index.html" opacity="0.77"/>
+    
+    <!-- Left Button -->
+    <path transform="translate(-24,111) scale(1.9)"stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+    <path class="menu-button" d="M60,100 Q75,115 100,140 Q75,165 60,180 Q45,165 20,140 Q45,115 60,100" data-option="gso.html" opacity="0.77"/>
+  </svg>
+  
+  <script>
+    let menuOpen = false;
+  
+    function showMenu(event) {
+      event.preventDefault();
+      var svg = document.getElementById('bezierMenu');
+      var x = event.clientX || event.touches[0].clientX;
+      var y = event.clientY || event.touches[0].clientY;
+      svg.style.display = 'block';
+      svg.style.left = x - 100 + 'px';
+      svg.style.top = y - 100 + 'px';
+      menuOpen = true;
+    }
+  
+    function hideMenu() {
+      var svg = document.getElementById('bezierMenu');
+      if (svg.style.display !== 'none') {
+        svg.style.display = 'none';
+      }
+      menuOpen = false;
+    }
+  
+    function handleMenuButton(event) {
+      if (event.target.classList.contains('menu-button')) {
+        const option = event.target.getAttribute('data-option');
+        console.log('Option selected:', option);
+        if (option) {
+          window.location.href = option;
+        }
+      }
+      hideMenu();
+    }
+  
+    // Add event listeners for touch events
+    document.body.addEventListener('touchstart', function(event) {
+      if (!menuOpen) {
+        showMenu(event);
+      } else {
+        handleMenuButton(event);
+      }
+    });
+  
+    // Add event listeners for mouse events (for non-mobile use)
+    document.body.addEventListener('mousedown', function(event) {
+      if (!menuOpen) {
+        showMenu(event);
+      } else {
+        handleMenuButton(event);
+      }
+    });
+  
+    // Hide the menu when clicking/tapping outside of it
+    document.body.addEventListener('mouseup', function(event) {
+      var svg = document.getElementById('bezierMenu');
+      if (menuOpen && event.target.closest('#bezierMenu') === null) {
+        hideMenu();
+      }
+    });
+  
+    document.body.addEventListener('touchend', function(event) {
+      var svg = document.getElementById('bezierMenu');
+      if (menuOpen && event.target.closest('#bezierMenu') === null) {
+        hideMenu();
+      }
+    });
+  
+    // Prevent the context menu from appearing on long press
+    document.body.addEventListener('contextmenu', function(event) {
+      event.preventDefault();
+    });
+  </script>
+      
+      
+</body>
+</html>

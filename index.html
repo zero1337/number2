@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Number 2</title>
+    <style>body, html {
+        height: 100%;
+        margin: 0;
+        background-color: none;
+        font-size: xx-large;
+        font-family: 'Courier New', monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #a0fa96;
+        text-shadow: 0 0 16.6px #8cff83;
+        /* #93f18c */
+    }
+    
+    .screen {
+        width: 800px; /* Adjust based on your preference */
+        height: 600px; /* Adjust based on your preference */
+    }
+
+    .ani-text {
+      animation: fadeIn 5.5s infinite;
+    }
+
+    @keyframes fadeIn {
+      77.2%, 83.7% { opacity: 0.79; }
+      83.7%, 77.2% { opacity: 0.79; }
+    }
+    
+    .cursor {
+        display: inline-block;
+        background-color: #a0fa96;
+        margin-left: 2px;
+        width: 10px;
+        height: 22px;
+        animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+        50% {
+            background-color: transparent;
+        }
+    }
+    .svraf {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        display: none;
+        cursor: pointer;
+        -webkit-filter: drop-shadow( 2px 3px 22px #a0fa96);
+        filter: drop-shadow( 2px 3px 22px #a0fa96);
+    }
+    .menu-button {
+    fill: #000; /* No fill to create the wireframe look */
+    stroke: #a0fa96; /* Outline color */
+    stroke-width: 2px; /* Width of the outline */
+    transition: stroke 0.3s; /* Smooth transition for hover effect */
+    }
+    .menu-button:hover {
+        fill: #a0fa96;
+        background: linear-gradient(to left, #000 50%, #a0fa96 50%) right;
+        background-size: 200%;
+        transition: .5s ease-out;
+    }
+    .menu-button.active {
+        background-position: left;
+    }
+
+  @media (max-width: 990px) {
+    #bezierMenu {
+      transform: scale(3.0); /* Adjust the scale as needed */
+      transform-origin: center; /* Ensure the menu scales from the top left corner */
+    }
+}
+    </style>    
+</head>
+<body>
+    <div id="svgContainer"></div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const container = document.getElementById("svgContainer");
+    container.style.position = "fixed";
+    container.style.top = "0";
+    container.style.left = "0";
+    container.style.width = "100%";
+    container.style.height = "100%";
+    container.style.zIndex = "-1";
+    container.style.overflow = "hidden";
+    container.style.backgroundColor = "black";
+
+    function createStar() {
+        let star = document.createElementNS(svgNS, "circle");
+        star.setAttribute("cx", Math.random() * window.innerWidth);
+        star.setAttribute("cy", Math.random() * window.innerHeight);
+        star.setAttribute("r", 0);  // Start with 0 radius for smooth animation start
+        star.setAttribute("fill", "white");
+        star.setAttribute("fill-opacity", "0");  // Start fully transparent
+        return star;
+    }
+
+    function animateStar(star) {
+        let duration = Math.random() * 3 + 2;  // Random duration between 2 to 5 seconds
+        let maxRadius = Math.random() * 2 + 1;  // Max size of the star
+
+        // Animate radius growth
+        let radiusAnimation = document.createElementNS(svgNS, "animate");
+        radiusAnimation.setAttribute("attributeName", "r");
+        radiusAnimation.setAttribute("from", "0");
+        radiusAnimation.setAttribute("to", maxRadius);
+        radiusAnimation.setAttribute("begin", "0s");
+        radiusAnimation.setAttribute("dur", `${duration}s`);
+        radiusAnimation.setAttribute("fill", "freeze");
+
+        // Animate opacity to make stars fade in and out smoothly
+        let opacityAnimation = document.createElementNS(svgNS, "animate");
+        opacityAnimation.setAttribute("attributeName", "fill-opacity");
+        opacityAnimation.setAttribute("values", "0;1;0");
+        opacityAnimation.setAttribute("times", "0;0.5;1");
+        opacityAnimation.setAttribute("dur", `${duration}s`);
+        opacityAnimation.setAttribute("repeatCount", "indefinite");
+
+        star.appendChild(radiusAnimation);
+        star.appendChild(opacityAnimation);
+    }
+
+    function populateStars(numStars) {
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("viewBox", `0 0 ${window.innerWidth} ${window.innerHeight}`);
+        svg.style.position = "absolute";
+        svg.style.width = "100%";
+        svg.style.height = "100%";
+
+        for (let i = 0; i < numStars; i++) {
+            let star = createStar();
+            animateStar(star);
+            svg.appendChild(star);
+        }
+        container.appendChild(svg);
+    }
+
+    populateStars(333); // Number of stars
+
+    // To continuously add stars over time, not just at the beginning
+    setInterval(() => {
+        container.firstChild.remove(); // Remove old stars to prevent slowdown
+        populateStars(333);
+    }, 20000);  // Refresh stars every 10 seconds to simulate continuous movement
+});
+    </script>
+    <div id="screen" class="screen">
+        <span id="content" class="ani-text"></span>
+        <span class="cursor"></span>
+<!-- the eye catcher -->
+        <svg width="100%" height="300px" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="shadow">
+                  <feDropShadow dx="3" dy="3" stdDeviation="7" flood-color="#a0fa96" flood-opacity="0.77"/>
+                </filter>
+              </defs>
+            <path stroke="#a0fa96" transform="translate(333,111) scale(3.3)" stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" opacity="0">
+              <animate attributeName="opacity" from="0" to="0.77" dur="1.5s" begin="15s" fill="freeze"  />
+              <animate attributeName="opacity" from="0.77" to="0.88" dur="0.25s" begin="16.5s" fill="freeze"  />
+              <animate attributeName="opacity" from="0.88" to="0" dur="1.5s" begin="16.75s" fill="freeze"  />
+
+              <animate attributeName="opacity" from="0" to="0.77" dur="1.5s" begin="21s" fill="freeze"  />
+              <animate attributeName="opacity" from="0.77" to="0.88" dur="0.25s" begin="22.5s" fill="freeze"  />
+              <animate attributeName="opacity" from="0.88" to="0" dur="1.5s" begin="22.75s" fill="freeze"  />
+
+              <animate attributeName="opacity" from="0" to="0.77" dur="1.5s" begin="26s" fill="freeze"  />
+              <animate attributeName="opacity" from="0.77" to="0.88" dur="0.25s" begin="27.5s" fill="freeze"  />
+              <animate attributeName="opacity" from="0.88" to="0" dur="1.5s" begin="27.75s" fill="freeze"  />
+            
+            </path>
+        </svg>  
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const content = document.getElementById('content');
+        const text = '“Eratosthenes\' only tools were sticks, eyes, feet, and brains; plus a zest for experiment. With those tools he correctly deduced the circumference of the Earth, to high precision, with an error of only a few percent. That\'s pretty good figuring for 2,200 years ago.\”  \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0― Carl Sagan, Cosmos';
+        let index = 0;
+    
+        function typeText() {
+            if (index < text.length) {
+                content.innerHTML += text.charAt(index);
+                index++;
+                setTimeout(typeText, 17.7); // Adjust typing speed
+            }
+        }
+    
+        typeText();
+    });
+    </script>
+
+
+  
+
+
+<svg id="bezierMenu" class="svraf" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 300" style="display:none;" stroke="#a0fa96">
+  
+   
+    <!-- Top Button -->
+      <path transform="translate(71, 0) scale(2.4)" stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" opacity="0.77"/>
+      <path class="menu-button" d="M100,60 Q115,75 140,100 Q115,125 100,140 Q85,125 60,100 Q85,75 100,60" data-option="home.html" opacity="0.77"/>
+      
+      <!-- Right Button -->
+      <!-- <path transform="translate(182, 111) scale(2.4)" stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" opacity="0.77"/> -->
+      <path class="menu-button" d="M140,100 Q155,115 180,140 Q155,165 140,180 Q125,165 100,140 Q115,125 140,100" data-option="#" opacity="0.77"/>
+      
+      <!-- Bottom Button -->
+      <path class="menu-button" d="M100,140 Q115,155 140,180 Q115,205 100,220 Q85,205 60,180 Q85,155 100,140" data-option="#" opacity="0.77"/>
+      
+      <!-- Left Button -->
+      <!-- <path transform="translate(-24,111) scale(1.9)"stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" /> -->
+      <path class="menu-button" d="M60,100 Q75,115 100,140 Q75,165 60,180 Q45,165 20,140 Q45,115 60,100" data-option="#" opacity="0.77"/>
+    </svg>
+  
+  <script>
+    let menuOpen = false;
+  
+    function showMenu(event) {
+      event.preventDefault();
+      var svg = document.getElementById('bezierMenu');
+      var x = event.clientX || event.touches[0].clientX;
+      var y = event.clientY || event.touches[0].clientY;
+      svg.style.display = 'block';
+      svg.style.left = x - 100 + 'px';
+      svg.style.top = y - 100 + 'px';
+      menuOpen = true;
+    }
+  
+    function hideMenu() {
+      var svg = document.getElementById('bezierMenu');
+      if (svg.style.display !== 'none') {
+        svg.style.display = 'none';
+      }
+      menuOpen = false;
+    }
+  
+    function handleMenuButton(event) {
+      if (event.target.classList.contains('menu-button')) {
+        const option = event.target.getAttribute('data-option');
+        console.log('Option selected:', option);
+        if (option) {
+          window.location.href = option;
+        }
+      }
+      hideMenu();
+    }
+  
+    // Add event listeners for touch events
+    document.body.addEventListener('touchstart', function(event) {
+      if (!menuOpen) {
+        showMenu(event);
+      } else {
+        handleMenuButton(event);
+      }
+    });
+  
+    // Add event listeners for mouse events (for non-mobile use)
+    document.body.addEventListener('mousedown', function(event) {
+      if (!menuOpen) {
+        showMenu(event);
+      } else {
+        handleMenuButton(event);
+      }
+    });
+  
+    // Hide the menu when clicking/tapping outside of it
+    document.body.addEventListener('mouseup', function(event) {
+      var svg = document.getElementById('bezierMenu');
+      if (menuOpen && event.target.closest('#bezierMenu') === null) {
+        hideMenu();
+      }
+    });
+  
+    document.body.addEventListener('touchend', function(event) {
+      var svg = document.getElementById('bezierMenu');
+      if (menuOpen && event.target.closest('#bezierMenu') === null) {
+        hideMenu();
+      }
+    });
+  
+    // Prevent the context menu from appearing on long press
+    document.body.addEventListener('contextmenu', function(event) {
+      event.preventDefault();
+    });
+  </script>
+      
+      
+</body>
+</html>
