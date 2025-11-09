@@ -4,4 +4,4 @@ Simple, easy to navigate with central navigation, interesting to browse, and low
 
 Need to fix scale on android vs iphone devices. 
 
-[![number2.site](http://number2.site)](http://number2.site)
+
